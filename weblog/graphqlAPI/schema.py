@@ -1,4 +1,5 @@
 from graphene_django import DjangoObjectType
+
 from bitorama.models import *
 
 
@@ -48,5 +49,18 @@ class InfoType(DjangoObjectType):
             'id',
             'title',
             'text',
+            'date_created',
+        )
+
+
+class SuggestionType(DjangoObjectType):
+    class Meta:
+        model = Suggestion
+        fields = (
+            'id',
+            'username',
+            'subject',
+            'text',
+            'email'
             'date_created',
         )
