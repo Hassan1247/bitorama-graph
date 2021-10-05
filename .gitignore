@@ -147,4 +147,7 @@ dmypy.json
 cython_debug/
 
 # Migrations
-weblog/bitorama/migrations/
+weblog/bitorama/migrations/0*
+
+# vscode
+weblog/.vscode/
