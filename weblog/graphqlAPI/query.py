@@ -19,7 +19,7 @@ class Query(graphene.ObjectType):
 
     def resolve_comments(root, info, **kwargs):
         # Querying a list
-        return Comment.objects.all()
+        return Comment.objects.filter(verified=True)
 
     def resolve_infos(root, info, **kwargs):
         # Querying a list

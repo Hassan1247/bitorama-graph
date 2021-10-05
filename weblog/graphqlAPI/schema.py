@@ -6,61 +6,28 @@ from bitorama.models import *
 class CategoryType(DjangoObjectType):
     class Meta:
         model = Category
-        fields = ('id', 'title', 'number_of_posts')
-
-
-class PostType(DjangoObjectType):
-    class Meta:
-        model = Post
-        fields = (
-            'id',
-            'title',
-            'description',
-            'picture',
-            'post',
-            'author',
-            'categories',
-            'number_of_views',
-            'number_of_likes',
-            'number_of_comments',
-            'date_created',
-        )
+        fields = "__all__"
 
 
 class CommentType(DjangoObjectType):
     class Meta:
         model = Comment
-        fields = (
-            'id',
-            'username',
-            'post',
-            'text',
-            'verified',
-            'number_of_views',
-            'number_of_likes',
-            'date_created',
-        )
+        fields = "__all__"
+
+
+class PostType(DjangoObjectType):
+    class Meta:
+        model = Post
+        fields = "__all__"
 
 
 class InfoType(DjangoObjectType):
     class Meta:
         model = Info
-        fields = (
-            'id',
-            'title',
-            'text',
-            'date_created',
-        )
+        fields = "__all__"
 
 
 class SuggestionType(DjangoObjectType):
     class Meta:
         model = Suggestion
-        fields = (
-            'id',
-            'username',
-            'subject',
-            'text',
-            'email'
-            'date_created',
-        )
+        fields = "__all__"
