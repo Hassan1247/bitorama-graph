@@ -1,4 +1,5 @@
 import graphene
+from graphql import GraphQLError
 
 from .schema import *
 from bitorama.models import *
@@ -31,35 +32,32 @@ class CreateSuggestion(graphene.Mutation):
         return CreateSuggestion(suggestion=suggestion)
 
 
-# class BookInput(graphene.InputObjectType):
-#     title = graphene.String()
-#     author = graphene.String()
-#     pages = graphene.Int()
-#     price = graphene.Int()
-#     quantity = graphene.Int()
-#     description = graphene.String()
-#     status = graphene.String()
+class CommentInput(graphene.InputObjectType):
+    post = graphene.ID()
+    username = graphene.String()
+    text = graphene.String()
 
 
-# class CreateBook(graphene.Mutation):
-#     class Arguments:
-#         input = BookInput(required=True)
+class CreateComment(graphene.Mutation):
+    class Arguments:
+        input = CommentInput(required=True)
 
-#     book = graphene.Field(BookType)
+    comment = graphene.Field(CommentType)
 
-#     @classmethod
-#     def mutate(cls, root, info, input):
-#         book = Book()
-#         book.title = input.title
-#         book.author = input.author
-#         book.pages = input.pages
-#         book.price = input.price
-#         book.quantity = input.quantity
-#         book.description = input.description
-#         book.status = input.status
-#         book.save()
-#         return CreateBook(book=book)
+    @classmethod
+    def mutate(cls, root, info, input):
+        comment = Comment()
+        try:
+            post = Post.objects.get(pk=input.post)
+        except:
+            raise GraphQLError('Post id not found')
+        comment.post = post
+        comment.username = input.username
+        comment.text = input.text
+        comment.save()
+        return CreateComment(comment=comment)
 
 
 class Mutation(graphene.ObjectType):
     create_suggestion = CreateSuggestion.Field()
+    create_comment = CreateComment.Field()
