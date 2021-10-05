@@ -51,3 +51,14 @@ class InfoType(DjangoObjectType):
             'text',
             'date_created',
         )
+
+
+class Query(graphene.ObjectType):
+    categories = graphene.List(CategoryType)
+
+    def resolve_categories(root, info, **kwargs):
+        # Querying a list
+        return Category.objects.all()
+
+
+schema = graphene.Schema(query=Query)

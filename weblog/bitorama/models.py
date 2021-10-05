@@ -21,9 +21,9 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    username = models.CharField(max_length=256)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     text = models.TextField()
-    username = models.CharField(max_length=256)
     verified = models.BooleanField(default=False)
     number_of_views = models.PositiveIntegerField(default=0)
     number_of_likes = models.PositiveIntegerField(default=0)
