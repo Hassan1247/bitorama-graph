@@ -38,6 +38,7 @@ class Comment(models.Model):
 
 class Category(models.Model):
     title = models.CharField(max_length=256)
+    number_of_posts = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name_plural = 'Categories'
