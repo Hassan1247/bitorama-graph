@@ -1,3 +1,4 @@
+import graphene
 from graphene_django import DjangoObjectType
 
 from bitorama.models import *
@@ -14,11 +15,16 @@ class CommentType(DjangoObjectType):
         model = Comment
         fields = "__all__"
 
+    @classmethod
+    def get_queryset(cls, queryset, info):
+        return queryset.filter(verified=True)
+
 
 class PostType(DjangoObjectType):
     class Meta:
         model = Post
         fields = "__all__"
+        comments = {"comments": {"type": "CommentType"}}
 
 
 class InfoType(DjangoObjectType):
