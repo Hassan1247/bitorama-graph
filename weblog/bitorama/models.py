@@ -25,7 +25,6 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     text = models.TextField()
     verified = models.BooleanField(default=False)
-    number_of_views = models.PositiveIntegerField(default=0)
     number_of_likes = models.PositiveIntegerField(default=0)
     date_created = models.DateTimeField(auto_now_add=True)
 

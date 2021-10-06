@@ -58,6 +58,31 @@ class CreateComment(graphene.Mutation):
         return CreateComment(comment=comment)
 
 
+class LikePost(graphene.Mutation):
+    class Arguments:
+        # Mutation to Like or Dislike a post
+        post = graphene.ID()
+        like = graphene.Boolean()
+
+    # Class attributes define the response of the mutation
+    message = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, post, like):
+        try:
+            post_from_db = Post.objects.get(pk=post)
+        except:
+            raise GraphQLError('Post id not found')
+        if like:
+            post_from_db.number_of_likes += 1
+        else:
+            post_from_db.number_of_likes -= 1
+        post_from_db.save()
+        message = str(like)
+        return LikePost(message)
+
+
 class Mutation(graphene.ObjectType):
     create_suggestion = CreateSuggestion.Field()
     create_comment = CreateComment.Field()
+    like_post = LikePost.Field()
