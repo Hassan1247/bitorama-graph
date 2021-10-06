@@ -8,12 +8,19 @@ class CategoryInput(graphene.InputObjectType):
     title = graphene.String()
 
 
+class InfoInput(graphene.InputObjectType):
+    id = graphene.ID()
+    title = graphene.String()
+    text = graphene.String()
+    date_from = graphene.String()
+    date_to = graphene.String()
+
+
 class Query(graphene.ObjectType):
     categories = graphene.List(
         CategoryType, input=graphene.Argument(CategoryInput))
     posts = graphene.List(PostType)
-    comments = graphene.List(CommentType)
-    infos = graphene.List(InfoType)
+    infos = graphene.List(InfoType, input=graphene.Argument(InfoInput))
 
     def resolve_categories(root, info, input=None):
         if input:
@@ -24,13 +31,16 @@ class Query(graphene.ObjectType):
         return Category.objects.all()
 
     def resolve_posts(root, info, **kwargs):
-        # Querying a list
         return Post.objects.all()
 
-    def resolve_comments(root, info, **kwargs):
-        # Querying a list
-        return Comment.objects.filter(verified=True)
-
-    def resolve_infos(root, info, **kwargs):
-        # Querying a list
+    def resolve_infos(root, info, input=None):
+        if input:
+            if input.id:
+                return Info.objects.filter(pk=input.id)
+            elif input.title:
+                return Info.objects.filter(title__contains=input.title)
+            elif input.text:
+                return Info.objects.filter(text__contains=input.text)
+            elif input.date_from and input.date_to:
+                return Info.objects.filter(date_created__gt=input.date_from, date_created__lt=input.date_to)
         return Info.objects.all()
