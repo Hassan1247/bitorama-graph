@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Post(models.Model):
-    title = models.CharField(max_length=256)
+    title = models.CharField(max_length=256, unique=True)
     description = models.CharField(max_length=512)
     picture = models.FileField()
     post = models.TextField()
@@ -36,7 +36,7 @@ class Comment(models.Model):
 
 
 class Category(models.Model):
-    title = models.CharField(max_length=256)
+    title = models.CharField(max_length=256, unique=True)
     number_of_posts = models.PositiveIntegerField(default=0)
 
     class Meta:
