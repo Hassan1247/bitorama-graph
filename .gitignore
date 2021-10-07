@@ -151,3 +151,6 @@ weblog/*/migrations/0*
 
 # vscode
 weblog/.vscode/
+
+# posts
+weblog/posts/
