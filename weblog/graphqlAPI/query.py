@@ -26,6 +26,11 @@ class InfoFilterInput(graphene.InputObjectType):
     date_to = graphene.String()
 
 
+class InfoSortInput(graphene.InputObjectType):
+    title = Sort()
+    date_created = Sort()
+
+
 class PostFilterInput(graphene.InputObjectType):
     id = graphene.ID()
     title = graphene.String()
@@ -40,7 +45,8 @@ class Query(graphene.ObjectType):
     categories = graphene.List(
         CategoryType, filter=graphene.Argument(CategoryFilterInput), sort=graphene.Argument(CategorySortInput))
     posts = graphene.List(PostType, filter=graphene.Argument(PostFilterInput))
-    infos = graphene.List(InfoType, filter=graphene.Argument(InfoFilterInput))
+    infos = graphene.List(InfoType, filter=graphene.Argument(
+        InfoFilterInput), sort=graphene.Argument(InfoSortInput))
 
     def resolve_categories(root, info, filter=None, sort=None):
         if filter:
@@ -77,7 +83,7 @@ class Query(graphene.ObjectType):
                 return Post.objects.filter(date_created__gt=filter.date_from, date_created__lt=filter.date_to)
         return Post.objects.all()
 
-    def resolve_infos(root, info, filter=None):
+    def resolve_infos(root, info, filter=None, sort=None):
         if filter:
             if filter.id:
                 return Info.objects.filter(pk=filter.id)
@@ -87,4 +93,15 @@ class Query(graphene.ObjectType):
                 return Info.objects.filter(text__contains=filter.text)
             elif filter.date_from and filter.date_to:
                 return Info.objects.filter(date_created__gt=filter.date_from, date_created__lt=input.date_to)
+        if sort:
+            if sort.title:
+                if sort.title == 1:
+                    return Info.objects.all().order_by('title')
+                else:
+                    return Info.objects.all().order_by('-title')
+            if sort.date_created:
+                if sort.date_created == 1:
+                    return Info.objects.all().order_by('date_created')
+                else:
+                    return Info.objects.all().order_by('-date_created')
         return Info.objects.all()
