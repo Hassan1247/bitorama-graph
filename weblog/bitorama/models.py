@@ -67,7 +67,7 @@ class Suggestion(models.Model):
 
 
 class Picture(models.Model):
-    picture = models.FileField()
+    picture = models.FileField(unique=True, db_index=True)
 
     def __str__(self):
-        return self.picture
+        return self.picture.name

@@ -18,26 +18,38 @@ class Command(BaseCommand):
             return
 
         print("\nLoading Posts available in ./posts/ ...", flush=True)
-        list_of_files = os.listdir(folder)
-        posts = []
-        for item in list_of_files:
+        set_of_files = set(os.listdir(folder))
+        posts = set()
+        for item in set_of_files:
             name, extension = os.path.splitext(item)
             if extension == '.post':
-                posts.append(name)
+                posts.add(name)
         i = 1
         for post in posts:
             import_post(folder, post, str(i))
             i += 1
         print('Done.', flush=True)
 
-        # print("\nLoading Pictures available in ./posts/ ...", flush=True)
-        # pictures = []
-        # i = 1
-        # for picture in pictures:
-        #     shutil.copy2(picture.picture.path, folder + picture.picture.name)
-        #     print(str(i) + '.\'' + picture.picture.name + '\' OK', flush=True)
-        #     i += 1
-        # print('Done.', flush=True)
+        print("\nLoading Pictures available in ./posts/ ...", flush=True)
+        pictures = set()
+        for item in set_of_files:
+            name, extension = os.path.splitext(item)
+            if name not in posts:
+                pictures.add(item)
+        i = 1
+        for picture in pictures:
+            try:
+                Picture.objects.get(picture=picture)
+            except:
+                pic = Picture()
+                f = open(folder + picture, 'rb')
+                name, extension = os.path.splitext(f.name)
+                pic.picture.save(picture, File(f))
+                f.close()
+                pic.save()
+            print(str(i) + '.\'' + picture + '\' OK', flush=True)
+            i += 1
+        print('Done.', flush=True)
 
 
 def import_post(folder, title, i):
