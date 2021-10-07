@@ -8,6 +8,11 @@ class Sort(graphene.Enum):
     DESC = -1
 
 
+class PaginationInput(graphene.InputObjectType):
+    offset = graphene.Int()
+    limit = graphene.Int()
+
+
 class CategoryFilterInput(graphene.InputObjectType):
     id = graphene.ID()
     title = graphene.String()
@@ -51,92 +56,104 @@ class PostSortInput(graphene.InputObjectType):
 
 class Query(graphene.ObjectType):
     categories = graphene.List(
-        CategoryType, filter=graphene.Argument(CategoryFilterInput), sort=graphene.Argument(CategorySortInput))
-    posts = graphene.List(PostType, filter=graphene.Argument(
-        PostFilterInput), sort=graphene.Argument(PostSortInput))
+        CategoryType, filter=graphene.Argument(CategoryFilterInput), sort=graphene.Argument(CategorySortInput), pagination=graphene.Argument(PaginationInput))
+    posts = graphene.List(PostType, filter=graphene.Argument(PostFilterInput), sort=graphene.Argument(
+        PostSortInput), pagination=graphene.Argument(PaginationInput))
     infos = graphene.List(InfoType, filter=graphene.Argument(
-        InfoFilterInput), sort=graphene.Argument(InfoSortInput))
+        InfoFilterInput), sort=graphene.Argument(InfoSortInput), pagination=graphene.Argument(PaginationInput))
 
-    def resolve_categories(root, info, filter=None, sort=None):
+    def resolve_categories(root, info, filter=None, sort=None, pagination=PaginationInput()):
+        if type(pagination.offset) != int:
+            pagination.offset = 0
+        if type(pagination.limit) != int:
+            pagination.limit = 100
         if filter:
             if filter.id:
-                return Category.objects.filter(pk=filter.id)
+                return Category.objects.filter(pk=filter.id)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.title:
-                return Category.objects.filter(title__contains=filter.title)
+                return Category.objects.filter(title__contains=filter.title)[pagination.offset:pagination.limit+pagination.offset]
         if sort:
             if sort.title:
                 if sort.title == 1:
-                    return Category.objects.all().order_by('title')
+                    return Category.objects.all().order_by('title')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Category.objects.all().order_by('-title')
+                    return Category.objects.all().order_by('-title')[pagination.offset:pagination.limit+pagination.offset]
             if sort.number_of_posts:
                 if sort.number_of_posts == 1:
-                    return Category.objects.all().order_by('number_of_posts')
+                    return Category.objects.all().order_by('number_of_posts')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Category.objects.all().order_by('-number_of_posts')
-        return Category.objects.all()
+                    return Category.objects.all().order_by('-number_of_posts')[pagination.offset:pagination.limit+pagination.offset]
+        return Category.objects.all()[pagination.offset:pagination.limit+pagination.offset]
 
-    def resolve_posts(root, info, filter=None, sort=None):
+    def resolve_posts(root, info, filter=None, sort=None, pagination=PaginationInput()):
+        if type(pagination.offset) != int:
+            pagination.offset = 0
+        if type(pagination.limit) != int:
+            pagination.limit = 100
         if filter:
             if filter.id:
-                return Post.objects.filter(pk=filter.id)
+                return Post.objects.filter(pk=filter.id)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.title:
-                return Post.objects.filter(title__contains=filter.title)
+                return Post.objects.filter(title__contains=filter.title)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.description:
-                return Post.objects.filter(description__contains=filter.description)
+                return Post.objects.filter(description__contains=filter.description)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.post:
-                return Post.objects.filter(post__contains=filter.post)
+                return Post.objects.filter(post__contains=filter.post)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.category:
-                return Post.objects.filter(categories__title__contains=filter.category)
+                return Post.objects.filter(categories__title__contains=filter.category)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.date_from and filter.date_to:
-                return Post.objects.filter(date_created__gt=filter.date_from, date_created__lt=filter.date_to)
+                return Post.objects.filter(date_created__gt=filter.date_from, date_created__lt=filter.date_to)[pagination.offset:pagination.limit+pagination.offset]
         if sort:
             if sort.title:
                 if sort.title == 1:
-                    return Post.objects.all().order_by('title')
+                    return Post.objects.all().order_by('title')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Post.objects.all().order_by('-title')
+                    return Post.objects.all().order_by('-title')[pagination.offset:pagination.limit+pagination.offset]
             if sort.number_of_views:
                 if sort.number_of_views == 1:
-                    return Post.objects.all().order_by('number_of_views')
+                    return Post.objects.all().order_by('number_of_views')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Post.objects.all().order_by('-number_of_views')
+                    return Post.objects.all().order_by('-number_of_views')[pagination.offset:pagination.limit+pagination.offset]
             if sort.number_of_likes:
                 if sort.number_of_likes == 1:
-                    return Post.objects.all().order_by('number_of_likes')
+                    return Post.objects.all().order_by('number_of_likes')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Post.objects.all().order_by('-number_of_likes')
+                    return Post.objects.all().order_by('-number_of_likes')[pagination.offset:pagination.limit+pagination.offset]
             if sort.number_of_comments:
                 if sort.number_of_comments == 1:
-                    return Post.objects.all().order_by('number_of_comments')
+                    return Post.objects.all().order_by('number_of_comments')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Post.objects.all().order_by('-number_of_comments')
+                    return Post.objects.all().order_by('-number_of_comments')[pagination.offset:pagination.limit+pagination.offset]
             if sort.date_created:
                 if sort.date_created == 1:
-                    return Post.objects.all().order_by('date_created')
+                    return Post.objects.all().order_by('date_created')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Post.objects.all().order_by('-date_created')
-        return Post.objects.all()
+                    return Post.objects.all().order_by('-date_created')[pagination.offset:pagination.limit+pagination.offset]
+        return Post.objects.all()[pagination.offset:pagination.limit+pagination.offset]
 
-    def resolve_infos(root, info, filter=None, sort=None):
+    def resolve_infos(root, info, filter=None, sort=None, pagination=PaginationInput()):
+        if type(pagination.offset) != int:
+            pagination.offset = 0
+        if type(pagination.limit) != int:
+            pagination.limit = 100
         if filter:
             if filter.id:
-                return Info.objects.filter(pk=filter.id)
+                return Info.objects.filter(pk=filter.id)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.title:
-                return Info.objects.filter(title__contains=filter.title)
+                return Info.objects.filter(title__contains=filter.title)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.text:
-                return Info.objects.filter(text__contains=filter.text)
+                return Info.objects.filter(text__contains=filter.text)[pagination.offset:pagination.limit+pagination.offset]
             elif filter.date_from and filter.date_to:
-                return Info.objects.filter(date_created__gt=filter.date_from, date_created__lt=input.date_to)
+                return Info.objects.filter(date_created__gt=filter.date_from, date_created__lt=input.date_to)[pagination.offset:pagination.limit+pagination.offset]
         if sort:
             if sort.title:
                 if sort.title == 1:
-                    return Info.objects.all().order_by('title')
+                    return Info.objects.all().order_by('title')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Info.objects.all().order_by('-title')
+                    return Info.objects.all().order_by('-title')[pagination.offset:pagination.limit+pagination.offset]
             if sort.date_created:
                 if sort.date_created == 1:
-                    return Info.objects.all().order_by('date_created')
+                    return Info.objects.all().order_by('date_created')[pagination.offset:pagination.limit+pagination.offset]
                 else:
-                    return Info.objects.all().order_by('-date_created')
-        return Info.objects.all()
+                    return Info.objects.all().order_by('-date_created')[pagination.offset:pagination.limit+pagination.offset]
+        return Info.objects.all()[pagination.offset:pagination.limit+pagination.offset]
