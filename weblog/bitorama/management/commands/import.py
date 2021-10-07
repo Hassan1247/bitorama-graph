@@ -1,6 +1,7 @@
-from django.core.management import BaseCommand
 import os
 import shutil
+from django.core.management import BaseCommand
+from django.core.files.base import File
 
 from bitorama.models import *
 
@@ -15,36 +16,85 @@ class Command(BaseCommand):
         if not os.path.exists(folder):
             print('No posts found!')
             return
-        print("Loading data models available in ./posts/ ...", flush=True)
 
-        set_of_posts = set(sorted(os.listdir(folder)))
-        print(set_of_posts)
-        # for
+        print("\nLoading Posts available in ./posts/ ...", flush=True)
+        list_of_files = os.listdir(folder)
+        posts = []
+        for item in list_of_files:
+            name, extension = os.path.splitext(item)
+            if extension == '.post':
+                posts.append(name)
+        i = 1
+        for post in posts:
+            import_post(folder, post, str(i))
+            i += 1
+        print('Done.', flush=True)
 
+        # print("\nLoading Pictures available in ./posts/ ...", flush=True)
+        # pictures = []
         # i = 1
-        # for post in posts:
-        #     import_post(folder, post, str(i))
+        # for picture in pictures:
+        #     shutil.copy2(picture.picture.path, folder + picture.picture.name)
+        #     print(str(i) + '.\'' + picture.picture.name + '\' OK', flush=True)
         #     i += 1
-        print('Done.')
+        # print('Done.', flush=True)
 
 
-def import_post(folder, post):
-    pass
-    # with open(folder + post.title + '.post', 'w') as my_file:
-    #     print('[TITLE]:\n' + post.title, file=my_file)
-    #     print('\n[DESCRIPTION]:\n' + post.description, file=my_file)
-    #     print('\n[POST]:\n' + post.post, file=my_file)
-    #     print('\n[AUTHOR]:\n' + post.author, file=my_file)
-    #     lis_of_categories = list(
-    #         post.categories.values_list('title', flat=True))
-    #     print('\n[CATEGORIES]:\n' + ','.join(lis_of_categories), file=my_file)
-    #     print('\n[NUMBER_OF_VIEWS]:\n' +
-    #           str(post.number_of_views), file=my_file)
-    #     print('\n[NUMBER_OF_LIKES]:\n' +
-    #           str(post.number_of_likes), file=my_file)
-    #     print('\n[NUMBER_OF_COMMENTS]:\n' +
-    #           str(post.number_of_comments), file=my_file)
-    #     print('\n[DATE_CREATED]:\n' + str(post.date_created), file=my_file)
-    # name, extension = os.path.splitext(post.picture.name)
-    # shutil.copy2(post.picture.path, folder + post.title + extension)
-    # print('%s.post' % (post.title), ' OK.')
+def import_post(folder, title, i):
+    with open(folder + title + '.post', 'r') as my_file:
+        lines = my_file.readlines()
+    for line in range(len(lines)):
+        lines[line] = lines[line].strip()
+
+    title_index = lines.index('[TITLE]:')
+    description_index = lines.index('[DESCRIPTION]:')
+    picture_index = lines.index('[PICTURE]:')
+    post_index = lines.index('[POST]:')
+    author_index = lines.index('[AUTHOR]:')
+    categories_index = lines.index('[CATEGORIES]:')
+    nov_index = lines.index('[NUMBER_OF_VIEWS]:')
+    nol_index = lines.index('[NUMBER_OF_LIKES]:')
+    noc_index = lines.index('[NUMBER_OF_COMMENTS]:')
+    date_index = lines.index('[DATE_CREATED]:')
+
+    title = '\n'.join(lines[title_index+1:description_index])
+    description = '\n'.join(lines[description_index+1:picture_index])
+    picture = lines[picture_index+1]
+    post = '\n'.join(lines[post_index+1:author_index])
+    author = '\n'.join(lines[author_index+1:categories_index])
+    categories = lines[categories_index+1]
+    number_of_views = lines[nov_index+1]
+    number_of_likes = lines[nol_index+1]
+    number_of_comments = lines[noc_index+1]
+    date_created = lines[date_index+1]
+
+    # import categories
+    categories = categories.split(',')
+    for item in categories:
+        try:
+            Category.objects.get(title=item)
+        except:
+            category = Category()
+            category.title = item
+            category.save()
+    # import posts
+    try:
+        Post.objects.get(title=title)
+    except:
+        new_post = Post()
+        new_post.title = title
+        new_post.description = description
+        f = open(folder + picture, 'rb')
+        name, extension = os.path.splitext(f.name)
+        new_post.picture.save(picture, File(f))
+        f.close()
+        new_post.post = post
+        new_post.author = author
+        new_post.number_of_views = number_of_views
+        new_post.number_of_likes = number_of_likes
+        new_post.number_of_comments = number_of_comments
+        new_post.date_created = date_created
+        new_post.save()
+        for item in categories:
+            new_post.categories.add(Category.objects.get(title=item))
+    print(i + '.\'%s.post\'' % (title) + ' OK', flush=True)

@@ -36,7 +36,7 @@ class Comment(models.Model):
 
 
 class Category(models.Model):
-    title = models.CharField(max_length=256, unique=True)
+    title = models.CharField(max_length=256, unique=True, db_index=True)
     number_of_posts = models.PositiveIntegerField(default=0)
 
     class Meta:
