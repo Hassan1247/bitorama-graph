@@ -1,5 +1,6 @@
 from django.core.management import BaseCommand
 import os
+import shutil
 
 from bitorama.models import *
 
@@ -29,5 +30,8 @@ class Command(BaseCommand):
                       str(post.number_of_comments), file=my_file)
                 print('\n[DATE_CREATED]:\n' +
                       str(post.date_created), file=my_file)
+            name, extension = os.path.splitext(post.picture.name)
+            shutil.copy2(post.picture.path, './posts/%s%s' %
+                         (post.title, extension))
             print('%s.post' % (post.title), ' OK.')
         print('Done.')
