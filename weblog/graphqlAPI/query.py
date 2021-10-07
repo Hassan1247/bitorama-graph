@@ -41,10 +41,19 @@ class PostFilterInput(graphene.InputObjectType):
     date_to = graphene.String()
 
 
+class PostSortInput(graphene.InputObjectType):
+    title = Sort()
+    number_of_views = Sort()
+    number_of_likes = Sort()
+    number_of_comments = Sort()
+    date_created = Sort()
+
+
 class Query(graphene.ObjectType):
     categories = graphene.List(
         CategoryType, filter=graphene.Argument(CategoryFilterInput), sort=graphene.Argument(CategorySortInput))
-    posts = graphene.List(PostType, filter=graphene.Argument(PostFilterInput))
+    posts = graphene.List(PostType, filter=graphene.Argument(
+        PostFilterInput), sort=graphene.Argument(PostSortInput))
     infos = graphene.List(InfoType, filter=graphene.Argument(
         InfoFilterInput), sort=graphene.Argument(InfoSortInput))
 
@@ -67,7 +76,7 @@ class Query(graphene.ObjectType):
                     return Category.objects.all().order_by('-number_of_posts')
         return Category.objects.all()
 
-    def resolve_posts(root, info, filter=None):
+    def resolve_posts(root, info, filter=None, sort=None):
         if filter:
             if filter.id:
                 return Post.objects.filter(pk=filter.id)
@@ -81,6 +90,32 @@ class Query(graphene.ObjectType):
                 return Post.objects.filter(categories__title__contains=filter.category)
             elif filter.date_from and filter.date_to:
                 return Post.objects.filter(date_created__gt=filter.date_from, date_created__lt=filter.date_to)
+        if sort:
+            if sort.title:
+                if sort.title == 1:
+                    return Post.objects.all().order_by('title')
+                else:
+                    return Post.objects.all().order_by('-title')
+            if sort.number_of_views:
+                if sort.number_of_views == 1:
+                    return Post.objects.all().order_by('number_of_views')
+                else:
+                    return Post.objects.all().order_by('-number_of_views')
+            if sort.number_of_likes:
+                if sort.number_of_likes == 1:
+                    return Post.objects.all().order_by('number_of_likes')
+                else:
+                    return Post.objects.all().order_by('-number_of_likes')
+            if sort.number_of_comments:
+                if sort.number_of_comments == 1:
+                    return Post.objects.all().order_by('number_of_comments')
+                else:
+                    return Post.objects.all().order_by('-number_of_comments')
+            if sort.date_created:
+                if sort.date_created == 1:
+                    return Post.objects.all().order_by('date_created')
+                else:
+                    return Post.objects.all().order_by('-date_created')
         return Post.objects.all()
 
     def resolve_infos(root, info, filter=None, sort=None):
