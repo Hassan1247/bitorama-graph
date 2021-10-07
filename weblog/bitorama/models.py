@@ -5,7 +5,7 @@ class Post(models.Model):
     title = models.CharField(max_length=256)
     description = models.CharField(max_length=512)
     picture = models.FileField()
-    post = models.FileField()
+    post = models.TextField()
     author = models.CharField(max_length=256, default='Hassan Moosaabadi')
     categories = models.ManyToManyField('Category', blank=True)
     number_of_views = models.PositiveIntegerField(default=0)
