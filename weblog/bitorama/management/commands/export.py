@@ -22,6 +22,10 @@ class Command(BaseCommand):
                 print('\n[DESCRIPTION]:\n' + post.description, file=my_file)
                 print('\n[POST]:\n' + post.post, file=my_file)
                 print('\n[AUTHOR]:\n' + post.author, file=my_file)
+                lis_of_categories = list(
+                    post.categories.values_list('title', flat=True))
+                print('\n[CATEGORIES]:\n' +
+                      ','.join(lis_of_categories), file=my_file)
                 print('\n[NUMBER_OF_VIEWS]:\n' +
                       str(post.number_of_views), file=my_file)
                 print('\n[NUMBER_OF_LIKES]:\n' +
