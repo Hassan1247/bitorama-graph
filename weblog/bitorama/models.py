@@ -64,3 +64,10 @@ class Suggestion(models.Model):
 
     def __str__(self):
         return self.subject
+
+
+class Picture(models.Model):
+    picture = models.FileField()
+
+    def __str__(self):
+        return self.picture

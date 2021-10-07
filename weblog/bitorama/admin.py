@@ -26,3 +26,8 @@ class InfoAdmin(admin.ModelAdmin):
 @admin.register(Suggestion)
 class SuggestionAdmin(admin.ModelAdmin):
     list_display = ['username', 'subject', 'email', 'date_created']
+
+
+@admin.register(Picture)
+class PictureAdmin(admin.ModelAdmin):
+    list_display = ['picture']
