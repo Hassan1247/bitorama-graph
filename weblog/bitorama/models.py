@@ -1,12 +1,14 @@
 from django.db import models
 
+DEFAULT_USERNAME = 'Hassan Moosaabadi'
+
 
 class Post(models.Model):
     title = models.CharField(max_length=256, unique=True)
     description = models.CharField(max_length=512)
     picture = models.FileField()
     post = models.TextField()
-    author = models.CharField(max_length=256, default='Hassan Moosaabadi')
+    author = models.CharField(max_length=256, default=DEFAULT_USERNAME)
     categories = models.ManyToManyField('Category', blank=True)
     number_of_views = models.PositiveIntegerField(default=0)
     number_of_likes = models.PositiveIntegerField(default=0)
@@ -71,3 +73,25 @@ class Picture(models.Model):
 
     def __str__(self):
         return self.picture.name
+
+
+class Conversation(models.Model):
+    username_guest = models.CharField(max_length=256)
+    username_host = models.CharField(
+        max_length=256, default=DEFAULT_USERNAME)
+    subject = models.CharField(max_length=256)
+    password = models.CharField(max_length=256)
+    messages = models.ManyToManyField('Message', blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.subject
+
+
+class Message(models.Model):
+    username = models.CharField(max_length=256)
+    text = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.subject
