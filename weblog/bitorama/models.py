@@ -94,4 +94,4 @@ class Message(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.subject
+        return self.text

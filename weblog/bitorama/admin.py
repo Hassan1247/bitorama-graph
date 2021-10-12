@@ -31,3 +31,13 @@ class SuggestionAdmin(admin.ModelAdmin):
 @admin.register(Picture)
 class PictureAdmin(admin.ModelAdmin):
     list_display = ['picture']
+
+
+@admin.register(Conversation)
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = ['username_guest', 'subject']
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ['username', 'text']
