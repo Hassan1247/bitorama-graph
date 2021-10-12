@@ -37,3 +37,16 @@ class SuggestionType(DjangoObjectType):
     class Meta:
         model = Suggestion
         fields = "__all__"
+
+
+class MessageType(DjangoObjectType):
+    class Meta:
+        model = Message
+        fields = "__all__"
+
+
+class ConversationType(DjangoObjectType):
+    class Meta:
+        model = Conversation
+        fields = "__all__"
+        messages = {"messages": {"type": "MessageType"}}
