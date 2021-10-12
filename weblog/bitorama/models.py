@@ -1,6 +1,7 @@
 from django.db import models
 
 DEFAULT_USERNAME = 'Hassan Moosaabadi'
+DEFAULT_PASSWORD = 'secret_password'
 
 
 class Post(models.Model):
@@ -80,7 +81,10 @@ class Conversation(models.Model):
     username_host = models.CharField(
         max_length=256, default=DEFAULT_USERNAME)
     subject = models.CharField(max_length=256)
-    password = models.CharField(max_length=256, unique=True, db_index=True)
+    password = models.CharField(
+        max_length=256, unique=True, db_index=True)
+    password_host = models.CharField(
+        max_length=256, default=DEFAULT_PASSWORD)
     messages = models.ManyToManyField('Message', blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -91,6 +95,7 @@ class Conversation(models.Model):
 class Message(models.Model):
     username = models.CharField(max_length=256)
     text = models.TextField()
+    read = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
 
     class Meta:

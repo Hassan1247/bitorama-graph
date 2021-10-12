@@ -62,8 +62,8 @@ class CreateComment(graphene.Mutation):
 class LikePost(graphene.Mutation):
     class Arguments:
         # Mutation to Like or Dislike a post
-        post = graphene.ID()
-        like = graphene.Boolean()
+        post = graphene.ID(required=True)
+        like = graphene.Boolean(required=True)
 
     # Class attributes define the response of the mutation
     message = graphene.String()
@@ -86,8 +86,8 @@ class LikePost(graphene.Mutation):
 class LikeComment(graphene.Mutation):
     class Arguments:
         # Mutation to Like or Dislike a comment
-        comment = graphene.ID()
-        like = graphene.Boolean()
+        comment = graphene.ID(required=True)
+        like = graphene.Boolean(required=True)
 
     # Class attributes define the response of the mutation
     message = graphene.String()
@@ -114,7 +114,7 @@ class ConversationInput(graphene.InputObjectType):
 
 class CreateConversation(graphene.Mutation):
     class Arguments:
-        # Mutation to create a Suggestion
+        # Mutation to create a Conversation
         input = ConversationInput(required=True)
 
     # Class attributes define the response of the mutation
@@ -141,9 +141,34 @@ class CreateConversation(graphene.Mutation):
         return CreateConversation(conversation=conversation)
 
 
+class SendMessage(graphene.Mutation):
+    class Arguments:
+        # Mutation to Send message to a conversation
+        password = graphene.String(required=True)
+        text = graphene.String(required=True)
+
+    # Class attributes define the response of the mutation
+    output = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, password, text):
+        try:
+            conversation = Conversation.objects.get(password=password)
+        except:
+            raise GraphQLError('Conversation not found')
+        message = Message()
+        message.username = conversation.username_guest
+        message.text = text
+        message.save()
+        conversation.messages.add(message)
+        output = 'OK'
+        return SendMessage(output)
+
+
 class Mutation(graphene.ObjectType):
     create_suggestion = CreateSuggestion.Field()
     create_comment = CreateComment.Field()
     like_post = LikePost.Field()
     like_comment = LikeComment.Field()
     create_conversation = CreateConversation.Field()
+    send_message = SendMessage.Field()
