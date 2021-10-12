@@ -1,4 +1,5 @@
 import graphene
+from graphql import GraphQLError
 
 from .schema import *
 
@@ -61,6 +62,7 @@ class Query(graphene.ObjectType):
         PostSortInput), pagination=graphene.Argument(PaginationInput))
     infos = graphene.List(InfoType, filter=graphene.Argument(
         InfoFilterInput), sort=graphene.Argument(InfoSortInput), pagination=graphene.Argument(PaginationInput))
+    conversation = graphene.Field(ConversationType, password=graphene.String())
 
     def resolve_categories(root, info, filter=None, sort=None, pagination=PaginationInput()):
         if type(pagination.offset) != int:
@@ -157,3 +159,9 @@ class Query(graphene.ObjectType):
                 else:
                     return Info.objects.all().order_by('-date_created')[pagination.offset:pagination.limit+pagination.offset]
         return Info.objects.all()[pagination.offset:pagination.limit+pagination.offset]
+
+    def resolve_conversation(root, info, password):
+        try:
+            return Conversation.objects.get(password=password)
+        except:
+            raise GraphQLError('Password is not correct!')
