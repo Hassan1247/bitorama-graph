@@ -80,7 +80,7 @@ class Conversation(models.Model):
     username_host = models.CharField(
         max_length=256, default=DEFAULT_USERNAME)
     subject = models.CharField(max_length=256)
-    password = models.CharField(max_length=256)
+    password = models.CharField(max_length=256, unique=True, db_index=True)
     messages = models.ManyToManyField('Message', blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
 

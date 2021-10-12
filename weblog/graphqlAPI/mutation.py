@@ -1,5 +1,6 @@
 import graphene
 from graphql import GraphQLError
+import randomname
 
 from .schema import *
 from bitorama.models import *
@@ -106,8 +107,43 @@ class LikeComment(graphene.Mutation):
         return LikeComment(message)
 
 
+class ConversationInput(graphene.InputObjectType):
+    username = graphene.String()
+    subject = graphene.String()
+
+
+class CreateConversation(graphene.Mutation):
+    class Arguments:
+        # Mutation to create a Suggestion
+        input = ConversationInput(required=True)
+
+    # Class attributes define the response of the mutation
+    conversation = graphene.Field(ConversationType)
+
+    @classmethod
+    def mutate(cls, root, info, input):
+        conversation = Conversation()
+        conversation.username_guest = input.username
+        conversation.subject = input.subject
+        password = ''
+        while(True):
+            password = randomname.get_name(adj=(
+                'speed', 'shape', 'sound', 'physics',  'corporate_prefixes', 'complexity', 'colors', 'algorithms', 'geometry', 'materials',  'music_theory', 'emotions', 'character',
+            ), noun=(
+                'typography', 'spirits', 'chemistry', 'seasonings', 'gaming',  'wine', 'music_production', 'sports',  'physics', 'physics_waves',  'web_development', 'physics_units', 'astronomy', 'startups', 'algorithms', 'geometry', 'set_theory', 'ghosts',  'music_instruments', 'filmmaking', 'music_theory', 'linear_algebra',  'coding',  'machine_learning', 'data_structures',
+            ))
+            chat = Conversation.objects.filter(password=password)
+            if not chat:
+                break
+        conversation.password = password
+        conversation.save()
+
+        return CreateConversation(conversation=conversation)
+
+
 class Mutation(graphene.ObjectType):
     create_suggestion = CreateSuggestion.Field()
     create_comment = CreateComment.Field()
     like_post = LikePost.Field()
     like_comment = LikeComment.Field()
+    create_conversation = CreateConversation.Field()
