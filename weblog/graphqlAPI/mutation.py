@@ -159,8 +159,8 @@ class SendMessage(graphene.Mutation):
         message = Message()
         message.username = conversation.username_guest
         message.text = text
+        message.conversation = conversation
         message.save()
-        conversation.messages.add(message)
         output = 'OK'
         return SendMessage(output)
 
