@@ -48,5 +48,5 @@ class MessageType(DjangoObjectType):
 class ConversationType(DjangoObjectType):
     class Meta:
         model = Conversation
-        exclude = ("password_host",)
+        fields = "__all__"
         messages = {"messages": {"type": "MessageType"}}

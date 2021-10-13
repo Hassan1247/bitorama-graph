@@ -1,8 +1,8 @@
-import os
 from django.db import models
+from django.contrib.auth.models import User
 
-DEFAULT_USERNAME = str(os.getenv('DEFAULT_USERNAME'))
-DEFAULT_PASSWORD = str(os.getenv('DEFAULT_PASSWORD'))
+user = User.objects.get(username='admin')
+DEFAULT_USERNAME = user.first_name + ' ' + user.last_name
 
 
 class Post(models.Model):
@@ -79,13 +79,11 @@ class Picture(models.Model):
 
 class Conversation(models.Model):
     username_guest = models.CharField(max_length=256)
-    username_host = models.CharField(
+    username_admin = models.CharField(
         max_length=256, default=DEFAULT_USERNAME)
     subject = models.CharField(max_length=256)
     password = models.CharField(
         max_length=256, unique=True, db_index=True)
-    password_host = models.CharField(
-        max_length=256, default=DEFAULT_PASSWORD)
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
