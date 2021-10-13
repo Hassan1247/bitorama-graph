@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# We must have an userAdmin with username `admin`
 user = User.objects.get(username='admin')
 DEFAULT_USERNAME = user.first_name + ' ' + user.last_name
 

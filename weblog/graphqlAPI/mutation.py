@@ -148,7 +148,7 @@ class SendMessage(graphene.Mutation):
         text = graphene.String(required=True)
 
     # Class attributes define the response of the mutation
-    output = graphene.String()
+    ok = graphene.Boolean()
 
     @classmethod
     def mutate(cls, root, info, password, text):
@@ -161,8 +161,31 @@ class SendMessage(graphene.Mutation):
         message.text = text
         message.conversation = conversation
         message.save()
-        output = 'OK'
-        return SendMessage(output)
+        return SendMessage(ok=True)
+
+
+class SeenMessage(graphene.Mutation):
+    class Arguments:
+        # Mutation to Send message to a conversation
+        password = graphene.String(required=True)
+        id = graphene.ID(required=True)
+
+    # Class attributes define the response of the mutation
+    ok = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, password, id):
+        try:
+            conversation = Conversation.objects.get(password=password)
+        except:
+            raise GraphQLError('Conversation not found!')
+        try:
+            message = Message.objects.get(id=id, conversation=conversation)
+        except:
+            raise GraphQLError('Message not found!')
+        message.seen = True
+        message.save()
+        return SeenMessage(ok=True)
 
 
 class Mutation(graphene.ObjectType):
@@ -172,3 +195,4 @@ class Mutation(graphene.ObjectType):
     like_comment = LikeComment.Field()
     create_conversation = CreateConversation.Field()
     send_message = SendMessage.Field()
+    seen_message = SeenMessage.Field()
