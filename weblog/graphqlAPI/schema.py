@@ -9,6 +9,11 @@ class CategoryType(DjangoObjectType):
         model = Category
         fields = "__all__"
 
+    number_of_posts = graphene.Int()
+
+    def resolve_number_of_posts(self, info):
+        return self.post_set.count()
+
 
 class CommentType(DjangoObjectType):
     class Meta:
@@ -25,6 +30,11 @@ class PostType(DjangoObjectType):
         model = Post
         fields = "__all__"
         comments = {"comments": {"type": "CommentType"}}
+
+    number_of_comments = graphene.Int()
+
+    def resolve_number_of_comments(self, info):
+        return self.comment_set.filter(verified=True).count()
 
 
 class InfoType(DjangoObjectType):

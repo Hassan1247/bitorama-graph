@@ -15,7 +15,6 @@ class Post(models.Model):
     categories = models.ManyToManyField('Category', blank=True)
     number_of_views = models.PositiveIntegerField(default=0)
     number_of_likes = models.PositiveIntegerField(default=0)
-    number_of_comments = models.PositiveIntegerField(default=0)
     date_created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -42,7 +41,6 @@ class Comment(models.Model):
 
 class Category(models.Model):
     title = models.CharField(max_length=256, unique=True, db_index=True)
-    number_of_posts = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name_plural = 'Categories'
