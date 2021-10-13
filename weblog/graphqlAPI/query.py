@@ -62,7 +62,9 @@ class Query(graphene.ObjectType):
         PostSortInput), pagination=graphene.Argument(PaginationInput))
     infos = graphene.List(InfoType, filter=graphene.Argument(
         InfoFilterInput), sort=graphene.Argument(InfoSortInput), pagination=graphene.Argument(PaginationInput))
-    conversation = graphene.Field(ConversationType, password=graphene.String())
+    conversation = graphene.Field(
+        ConversationType, password=graphene.String(required=True))
+    post = graphene.Field(PostType, id=graphene.ID(required=True))
 
     def resolve_categories(root, info, filter=None, sort=None, pagination=PaginationInput()):
         if type(pagination.offset) != int:
@@ -165,3 +167,12 @@ class Query(graphene.ObjectType):
             return Conversation.objects.get(password=password)
         except:
             raise GraphQLError('Password is not correct!')
+
+    def resolve_post(root, info, id):
+        try:
+            post = Post.objects.get(id=id)
+        except:
+            raise GraphQLError('Post not found!')
+        post.number_of_views += 1
+        post.save()
+        return post
