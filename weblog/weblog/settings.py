@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'bitorama',
     'graphqlAPI',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

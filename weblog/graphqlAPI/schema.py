@@ -1,15 +1,32 @@
-import graphene
 from graphene_django import DjangoObjectType
+from graphene import Node, Int
+from graphene_django.filter import DjangoFilterConnectionField
+from django_filters import FilterSet, OrderingFilter, CharFilter
 
 from bitorama.models import *
 
 
-class CategoryType(DjangoObjectType):
+class CategoryFilter(FilterSet):
+    title = CharFilter(lookup_expr='icontains')
+
     class Meta:
         model = Category
-        fields = "__all__"
+        fields = ['title']
+        order_by = OrderingFilter(
+            fields=(
+                ('number_of_posts'),
+            )
+        )
 
-    number_of_posts = graphene.Int()
+
+class CategoryNode(DjangoObjectType):
+    class Meta:
+        model = Category
+        interfaces = (Node, )
+        fields = "__all__"
+        filterset_class = CategoryFilter
+
+    number_of_posts = Int()
 
     def resolve_number_of_posts(self, info):
         return self.post_set.count()
@@ -31,7 +48,7 @@ class PostType(DjangoObjectType):
         fields = "__all__"
         comments = {"comments": {"type": "CommentType"}}
 
-    number_of_comments = graphene.Int()
+    number_of_comments = Int()
 
     def resolve_number_of_comments(self, info):
         return self.comment_set.filter(verified=True).count()

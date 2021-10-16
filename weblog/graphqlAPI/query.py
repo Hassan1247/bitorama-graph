@@ -1,7 +1,32 @@
 import graphene
 from graphql import GraphQLError
+from graphene_django.filter import DjangoFilterConnectionField
+from graphene.utils.str_converters import to_snake_case
 
 from .schema import *
+
+
+class OrderedDjangoFilterConnectionField(DjangoFilterConnectionField):
+
+    @classmethod
+    def resolve_queryset(
+        cls, connection, iterable, info, args, filtering_args, filterset_class
+    ):
+        qs = super(DjangoFilterConnectionField, cls).resolve_queryset(
+            connection, iterable, info, args
+        )
+        filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
+        qs = filterset_class(data=filter_kwargs,
+                             queryset=qs, request=info.context).qs
+
+        order = args.get('orderBy', None)
+        if order:
+            if type(order) is str:
+                snake_order = to_snake_case(order)
+            else:
+                snake_order = [to_snake_case(o) for o in order]
+            qs = qs.order_by(*snake_order)
+        return qs
 
 
 class Sort(graphene.Enum):
@@ -56,8 +81,10 @@ class PostSortInput(graphene.InputObjectType):
 
 
 class Query(graphene.ObjectType):
-    categories = graphene.List(
-        CategoryType, filter=graphene.Argument(CategoryFilterInput), sort=graphene.Argument(CategorySortInput), pagination=graphene.Argument(PaginationInput))
+    category = graphene.Node.Field(CategoryNode)
+    categories = OrderedDjangoFilterConnectionField(CategoryNode,
+                                                    orderBy=graphene.List(of_type=graphene.String))
+
     posts = graphene.List(PostType, filter=graphene.Argument(PostFilterInput), sort=graphene.Argument(
         PostSortInput), pagination=graphene.Argument(PaginationInput))
     infos = graphene.List(InfoType, filter=graphene.Argument(
@@ -65,29 +92,6 @@ class Query(graphene.ObjectType):
     conversation = graphene.Field(
         ConversationType, password=graphene.String(required=True))
     post = graphene.Field(PostType, id=graphene.ID(required=True))
-
-    def resolve_categories(root, info, filter=None, sort=None, pagination=PaginationInput()):
-        if type(pagination.offset) != int:
-            pagination.offset = 0
-        if type(pagination.limit) != int:
-            pagination.limit = 100
-        if filter:
-            if filter.id:
-                return Category.objects.filter(pk=filter.id)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.title:
-                return Category.objects.filter(title__contains=filter.title)[pagination.offset:pagination.limit+pagination.offset]
-        if sort:
-            if sort.title:
-                if sort.title == 1:
-                    return Category.objects.all().order_by('title')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Category.objects.all().order_by('-title')[pagination.offset:pagination.limit+pagination.offset]
-            if sort.number_of_posts:
-                if sort.number_of_posts == 1:
-                    return Category.objects.all().order_by('number_of_posts')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Category.objects.all().order_by('-number_of_posts')[pagination.offset:pagination.limit+pagination.offset]
-        return Category.objects.all()[pagination.offset:pagination.limit+pagination.offset]
 
     def resolve_posts(root, info, filter=None, sort=None, pagination=PaginationInput()):
         if type(pagination.offset) != int:
