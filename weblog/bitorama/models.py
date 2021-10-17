@@ -17,9 +17,6 @@ class Post(models.Model):
     number_of_likes = models.PositiveIntegerField(default=0)
     date_created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ['-date_created']
-
     def __str__(self):
         return self.title
 
@@ -31,9 +28,6 @@ class Comment(models.Model):
     verified = models.BooleanField(default=False)
     number_of_likes = models.PositiveIntegerField(default=0)
     date_created = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-date_created']
 
     def __str__(self):
         return self.text

@@ -2,6 +2,7 @@ from graphene_django import DjangoObjectType
 from graphene import Node, Int
 from graphene_django.filter import DjangoFilterConnectionField
 from django_filters import FilterSet, OrderingFilter, CharFilter, DateFilter
+from django.db.models import Count
 
 from bitorama.models import *
 
@@ -12,11 +13,6 @@ class CategoryFilter(FilterSet):
     class Meta:
         model = Category
         fields = ['title']
-        order_by = OrderingFilter(
-            fields=(
-                ('number_of_posts'),
-            )
-        )
 
 
 class CategoryNode(DjangoObjectType):
@@ -30,6 +26,10 @@ class CategoryNode(DjangoObjectType):
 
     def resolve_number_of_posts(self, info):
         return self.post_set.count()
+
+    @classmethod
+    def get_queryset(cls, queryset, info):
+        return queryset.annotate(number_of_posts=Count('post')).order_by('-number_of_posts')
 
 
 class CommentType(DjangoObjectType):
