@@ -29,47 +29,6 @@ class OrderedDjangoFilterConnectionField(DjangoFilterConnectionField):
         return qs
 
 
-class Sort(graphene.Enum):
-    ASC = 1
-    DESC = -1
-
-
-class PaginationInput(graphene.InputObjectType):
-    offset = graphene.Int()
-    limit = graphene.Int()
-
-
-class InfoFilterInput(graphene.InputObjectType):
-    id = graphene.ID()
-    title = graphene.String()
-    text = graphene.String()
-    date_from = graphene.String()
-    date_to = graphene.String()
-
-
-class InfoSortInput(graphene.InputObjectType):
-    title = Sort()
-    date_created = Sort()
-
-
-class PostFilterInput(graphene.InputObjectType):
-    id = graphene.ID()
-    title = graphene.String()
-    description = graphene.String()
-    post = graphene.String()
-    category = graphene.String()
-    date_from = graphene.String()
-    date_to = graphene.String()
-
-
-class PostSortInput(graphene.InputObjectType):
-    title = Sort()
-    number_of_views = Sort()
-    number_of_likes = Sort()
-    number_of_comments = Sort()
-    date_created = Sort()
-
-
 class Query(graphene.ObjectType):
     category = graphene.Node.Field(CategoryNode)
     categories = OrderedDjangoFilterConnectionField(CategoryNode,
@@ -91,12 +50,3 @@ class Query(graphene.ObjectType):
             return Conversation.objects.get(password=password)
         except:
             raise GraphQLError('Password is not correct!')
-
-    # def resolve_posts(self, info, **kwargs):
-    #     print('hi')
-    #     # post.number_of_views += 1
-    #     # post.save()
-    #     return PostFilter(kwargs).qs
-
-    # def resolve_categories(self, info, **kwargs):
-    #     return CategoryFilter(kwargs).qs.order_by('-number_of_posts')

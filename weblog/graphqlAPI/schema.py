@@ -47,14 +47,14 @@ class PostFilter(FilterSet):
     description = CharFilter(lookup_expr='icontains')
     post = CharFilter(lookup_expr='icontains')
     author = CharFilter(lookup_expr='icontains')
-    categories = CharFilter(lookup_expr='icontains')
+    # categories = CharFilter(lookup_expr='icontains')
     date_from = DateFilter('date_created', lookup_expr='gte')
     date_to = DateFilter('date_created', lookup_expr='lte')
 
     class Meta:
         model = Category
         fields = ['title', 'description', 'post',
-                  'author', 'categories']
+                  'author']
 
 
 class PostNode(DjangoObjectType):
@@ -69,6 +69,13 @@ class PostNode(DjangoObjectType):
 
     def resolve_number_of_comments(self, info):
         return self.comment_set.filter(verified=True).count()
+
+    @classmethod
+    def get_node(cls, info, id):
+        post = Post.objects.get(id=id)
+        post.number_of_views += 1
+        post.save()
+        return post
 
 
 class InfoFilter(FilterSet):
