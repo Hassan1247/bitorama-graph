@@ -71,10 +71,23 @@ class PostNode(DjangoObjectType):
         return self.comment_set.filter(verified=True).count()
 
 
-class InfoType(DjangoObjectType):
+class InfoFilter(FilterSet):
+    title = CharFilter(lookup_expr='icontains')
+    text = CharFilter(lookup_expr='icontains')
+    date_from = DateFilter('date_created', lookup_expr='gte')
+    date_to = DateFilter('date_created', lookup_expr='lte')
+
+    class Meta:
+        model = Category
+        fields = ['title', 'text', ]
+
+
+class InfoNode(DjangoObjectType):
     class Meta:
         model = Info
+        interfaces = (Node, )
         fields = "__all__"
+        filterset_class = InfoFilter
 
 
 class SuggestionType(DjangoObjectType):

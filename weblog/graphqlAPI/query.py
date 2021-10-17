@@ -79,37 +79,12 @@ class Query(graphene.ObjectType):
     posts = OrderedDjangoFilterConnectionField(PostNode,
                                                orderBy=graphene.List(of_type=graphene.String))
 
-    infos = graphene.List(InfoType, filter=graphene.Argument(
-        InfoFilterInput), sort=graphene.Argument(InfoSortInput), pagination=graphene.Argument(PaginationInput))
+    info = graphene.Node.Field(InfoNode)
+    infos = OrderedDjangoFilterConnectionField(InfoNode,
+                                               orderBy=graphene.List(of_type=graphene.String))
+
     conversation = graphene.Field(
         ConversationType, password=graphene.String(required=True))
-
-    def resolve_infos(root, info, filter=None, sort=None, pagination=PaginationInput()):
-        if type(pagination.offset) != int:
-            pagination.offset = 0
-        if type(pagination.limit) != int:
-            pagination.limit = 100
-        if filter:
-            if filter.id:
-                return Info.objects.filter(pk=filter.id)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.title:
-                return Info.objects.filter(title__contains=filter.title)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.text:
-                return Info.objects.filter(text__contains=filter.text)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.date_from and filter.date_to:
-                return Info.objects.filter(date_created__gt=filter.date_from, date_created__lt=input.date_to)[pagination.offset:pagination.limit+pagination.offset]
-        if sort:
-            if sort.title:
-                if sort.title == 1:
-                    return Info.objects.all().order_by('title')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Info.objects.all().order_by('-title')[pagination.offset:pagination.limit+pagination.offset]
-            if sort.date_created:
-                if sort.date_created == 1:
-                    return Info.objects.all().order_by('date_created')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Info.objects.all().order_by('-date_created')[pagination.offset:pagination.limit+pagination.offset]
-        return Info.objects.all()[pagination.offset:pagination.limit+pagination.offset]
 
     def resolve_conversation(root, info, password):
         try:
