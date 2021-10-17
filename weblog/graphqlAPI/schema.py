@@ -1,7 +1,7 @@
 from graphene_django import DjangoObjectType
 from graphene import Node, Int
 from graphene_django.filter import DjangoFilterConnectionField
-from django_filters import FilterSet, OrderingFilter, CharFilter
+from django_filters import FilterSet, OrderingFilter, CharFilter, DateFilter
 
 from bitorama.models import *
 
@@ -42,10 +42,27 @@ class CommentType(DjangoObjectType):
         return queryset.filter(verified=True)
 
 
-class PostType(DjangoObjectType):
+class PostFilter(FilterSet):
+    title = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+    post = CharFilter(lookup_expr='icontains')
+    author = CharFilter(lookup_expr='icontains')
+    categories = CharFilter(lookup_expr='icontains')
+    date_from = DateFilter('date_created', lookup_expr='gte')
+    date_to = DateFilter('date_created', lookup_expr='lte')
+
+    class Meta:
+        model = Category
+        fields = ['title', 'description', 'post',
+                  'author', 'categories']
+
+
+class PostNode(DjangoObjectType):
     class Meta:
         model = Post
+        interfaces = (Node, )
         fields = "__all__"
+        filterset_class = PostFilter
         comments = {"comments": {"type": "CommentType"}}
 
     number_of_comments = Int()

@@ -39,16 +39,6 @@ class PaginationInput(graphene.InputObjectType):
     limit = graphene.Int()
 
 
-class CategoryFilterInput(graphene.InputObjectType):
-    id = graphene.ID()
-    title = graphene.String()
-
-
-class CategorySortInput(graphene.InputObjectType):
-    title = Sort()
-    number_of_posts = Sort()
-
-
 class InfoFilterInput(graphene.InputObjectType):
     id = graphene.ID()
     title = graphene.String()
@@ -85,59 +75,14 @@ class Query(graphene.ObjectType):
     categories = OrderedDjangoFilterConnectionField(CategoryNode,
                                                     orderBy=graphene.List(of_type=graphene.String))
 
-    posts = graphene.List(PostType, filter=graphene.Argument(PostFilterInput), sort=graphene.Argument(
-        PostSortInput), pagination=graphene.Argument(PaginationInput))
+    post = graphene.Node.Field(PostNode)
+    posts = OrderedDjangoFilterConnectionField(PostNode,
+                                               orderBy=graphene.List(of_type=graphene.String))
+
     infos = graphene.List(InfoType, filter=graphene.Argument(
         InfoFilterInput), sort=graphene.Argument(InfoSortInput), pagination=graphene.Argument(PaginationInput))
     conversation = graphene.Field(
         ConversationType, password=graphene.String(required=True))
-    post = graphene.Field(PostType, id=graphene.ID(required=True))
-
-    def resolve_posts(root, info, filter=None, sort=None, pagination=PaginationInput()):
-        if type(pagination.offset) != int:
-            pagination.offset = 0
-        if type(pagination.limit) != int:
-            pagination.limit = 100
-        if filter:
-            if filter.id:
-                return Post.objects.filter(pk=filter.id)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.title:
-                return Post.objects.filter(title__contains=filter.title)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.description:
-                return Post.objects.filter(description__contains=filter.description)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.post:
-                return Post.objects.filter(post__contains=filter.post)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.category:
-                return Post.objects.filter(categories__title__contains=filter.category)[pagination.offset:pagination.limit+pagination.offset]
-            elif filter.date_from and filter.date_to:
-                return Post.objects.filter(date_created__gt=filter.date_from, date_created__lt=filter.date_to)[pagination.offset:pagination.limit+pagination.offset]
-        if sort:
-            if sort.title:
-                if sort.title == 1:
-                    return Post.objects.all().order_by('title')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Post.objects.all().order_by('-title')[pagination.offset:pagination.limit+pagination.offset]
-            if sort.number_of_views:
-                if sort.number_of_views == 1:
-                    return Post.objects.all().order_by('number_of_views')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Post.objects.all().order_by('-number_of_views')[pagination.offset:pagination.limit+pagination.offset]
-            if sort.number_of_likes:
-                if sort.number_of_likes == 1:
-                    return Post.objects.all().order_by('number_of_likes')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Post.objects.all().order_by('-number_of_likes')[pagination.offset:pagination.limit+pagination.offset]
-            if sort.number_of_comments:
-                if sort.number_of_comments == 1:
-                    return Post.objects.all().order_by('number_of_comments')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Post.objects.all().order_by('-number_of_comments')[pagination.offset:pagination.limit+pagination.offset]
-            if sort.date_created:
-                if sort.date_created == 1:
-                    return Post.objects.all().order_by('date_created')[pagination.offset:pagination.limit+pagination.offset]
-                else:
-                    return Post.objects.all().order_by('-date_created')[pagination.offset:pagination.limit+pagination.offset]
-        return Post.objects.all()[pagination.offset:pagination.limit+pagination.offset]
 
     def resolve_infos(root, info, filter=None, sort=None, pagination=PaginationInput()):
         if type(pagination.offset) != int:
@@ -172,11 +117,11 @@ class Query(graphene.ObjectType):
         except:
             raise GraphQLError('Password is not correct!')
 
-    def resolve_post(root, info, id):
-        try:
-            post = Post.objects.get(id=id)
-        except:
-            raise GraphQLError('Post not found!')
-        post.number_of_views += 1
-        post.save()
-        return post
+    # def resolve_posts(self, info, **kwargs):
+    #     print('hi')
+    #     # post.number_of_views += 1
+    #     # post.save()
+    #     return PostFilter(kwargs).qs
+
+    # def resolve_categories(self, info, **kwargs):
+    #     return CategoryFilter(kwargs).qs.order_by('-number_of_posts')
